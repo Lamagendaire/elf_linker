@@ -1,1 +1,5 @@
 Custom ELF Loader intended for pedagogic use
+
+arm-none-eabi-gcc -mno-thumb-interwork -S file1.c
+arm-none-eabi-as -o file1.o file1.s
+arm-eabi-as -o file1.o file1.s
