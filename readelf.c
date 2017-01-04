@@ -65,15 +65,6 @@ int displayNameSection(FILE* ElfFile)
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader,ITERheader;
 	char *STR_buffer_name=NULL;
-  char *STR_buffer_type=NULL;
-  char *STR_buffer_addr=NULL;
-  char *STR_buffer_offset=NULL;
-  char *STR_buffer_size=NULL;
-  char *STR_buffer_entsize=NULL;
-  char *STR_buffer_flags=NULL;
-  char *STR_buffer_link=NULL;
-  char *STR_buffer_info=NULL;
-  char *STR_buffer_addralign=NULL;
 	int iter_s; 
 	
   char* type="";
@@ -147,15 +138,6 @@ int displayNameSection(FILE* ElfFile)
 	}
 	
 	free( STR_buffer_name );
-  free( STR_buffer_type );
-  free( STR_buffer_size );
-  free( STR_buffer_entsize );
-  free( STR_buffer_flags );
-  free( STR_buffer_link );
-  free( STR_buffer_info );
-  free( STR_buffer_addr );
-  free( STR_buffer_addralign );
-
 	rewind(ElfFile);
 		
 	return 0;
