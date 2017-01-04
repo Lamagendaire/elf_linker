@@ -4,57 +4,71 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include "util.h"
+#include "elf.h"
 
 #pragma pack(push,1)
 #pragma pack(pop)
 
 #define EI_NIDENT       16
 
-/* 32-bit ELF base types. */
-typedef unsigned int Elf32_Addr;
-typedef unsigned short Elf32_Half;
-typedef unsigned int Elf32_Off;
-typedef signed int Elf32_Sword;
-typedef unsigned int Elf32_Word;
 
-typedef struct elf32_hdr{
-  unsigned char e_ident[EI_NIDENT];
-  Elf32_Half    e_type;
-  Elf32_Half    e_machine;
-  Elf32_Word    e_version;
-  Elf32_Addr    e_entry;  /* Entry point */
-  Elf32_Off e_phoff;
-  Elf32_Off e_shoff;
-  Elf32_Word    e_flags;
-  Elf32_Half    e_ehsize;
-  Elf32_Half    e_phentsize;
-  Elf32_Half    e_phnum;
-  Elf32_Half    e_shentsize;
-  Elf32_Half    e_shnum;
-  Elf32_Half    e_shstrndx;
+void displayNameSection(FILE* ElfFile);
 
-} Elf32_Ehdr;
+FILE* ElfFile = NULL;
 
-typedef struct elf32_shdr {
-  Elf32_Word    sh_name;
-  Elf32_Word    sh_type;
-  Elf32_Word    sh_flags;
-  Elf32_Addr    sh_addr;
-  Elf32_Off sh_offset;
-  Elf32_Word    sh_size;
-  Elf32_Word    sh_link;
-  Elf32_Word    sh_info;
-  Elf32_Word    sh_addralign;
-  Elf32_Word    sh_entsize;
-} Elf32_Shdr;
+void displayNameSection(FILE* ElfFile)
+{
 
-void displaySection(char* identifiant);
+  Elf32_Ehdr ELFheader;
+  Elf32_Shdr STRheader,ITERheader;
+  char *STR_buffer=NULL;
+  int iter_s; 
 
+  //read header file
+  fseek( ElfFile, 0, SEEK_SET );
+  fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
+
+  //find string section
+  for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
+  {
+    fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+    fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
+    if ((STRheader.sh_type == SHT_STRTAB) && 
+      (STRheader.sh_addr == 0x00000000))
+    {
+      STR_buffer = (char *)malloc( STRheader.sh_size);
+      if (STR_buffer == NULL) 
+      {
+        printf("Cannot allocate memory for section string names\n");
+        return 0;
+      }
+      fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
+      fread( STR_buffer, STRheader.sh_size, 1, ElfFile);
+      iter_s=ELFheader.e_shnum+1;
+    }
+  }
+
+  //now iter and print segment names
+  fseek(ElfFile, 0, SEEK_SET);
+  for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
+  {
+    fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+    fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+    if (1==1)
+    {
+      printf("%s\n", STR_buffer+ITERheader.sh_name);
+    }
+  }
+
+  free( STR_buffer );
+  fclose( ElfFile );
+
+  return 0;
+}
 
 
 int main(int argc, char **argv) 
 {
-  FILE* ElfFile = NULL;
   uint32_t idx;
   char* Header = NULL;
   char* SectNames = NULL;
@@ -141,34 +155,31 @@ else{
     printf("\nEntry index : %"PRIu32,elf1.e_shstrndx);
     printf("\nHeader size : %"PRIu32,elf1.e_ehsize);
     printf("\n");
-    
-   SectNames = malloc(elfSH.sh_size);
-   //fseek(ElfFile, elfSH.sh_offset, SEEK_SET);
-   fread(SectNames, 1, elfSH.sh_size, ElfFile);
+    rewind(ElfFile);
+   // SectNames = malloc(elfSH.sh_size);
+   // //fseek(ElfFile, elfSH.sh_offset, SEEK_SET);
+   // fread(SectNames, 1, elfSH.sh_size, ElfFile);
 
-	// read all section headers
-  for (idx = 0; idx < elf1.e_shnum; idx++)
-  {
-    const char* name = "";
+	// // read all section headers
+ //  for (idx = 0; idx < elf1.e_shnum; idx++)
+ //  {
+ //    const char* name = "";
     
-	//fseek(ElfFile, elf1.e_shoff + elf1.e_shstrndx * sizeof(elfSH), SEEK_SET);
-	fread(&elfSH, 1, sizeof(elfSH), ElfFile);
+	// //fseek(ElfFile, elf1.e_shoff + elf1.e_shstrndx * sizeof(elfSH), SEEK_SET);
+	// fread(&elfSH, 1, sizeof(elfSH), ElfFile);
   
- 	printf("%s",elfSH.sh_name);
-	//displaySection(name);
+ // 	printf("%d",elfSH.sh_name);
+
+  
+	// //displaySection(name);
 	
-    // print section name
-    /*if (elfSH.sh_name);
-      name = SectNames + elfSH.sh_name;
-    printf("%2u %s\n", idx, name);*/
-  }
+ //    // print section name
+ //    /*if (elfSH.sh_name);
+ //      name = SectNames + elfSH.sh_name;
+ //    printf("%2u %s\n", idx, name);*/
+ //  }
   
-
+  displayNameSection(ElfFile);
 } 
-
-void displaySection(char* identifiant)
-{
-	printf("fonction displaySection\n");
-}
 
 
