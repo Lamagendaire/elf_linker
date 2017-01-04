@@ -9,14 +9,13 @@
 #pragma pack(push,1)
 #pragma pack(pop)
 
-#define EI_NIDENT       16
 
 
-void displayNameSection(FILE* ElfFile);
+int displayNameSection(FILE* ElfFile);
 
 FILE* ElfFile = NULL;
 
-void displayNameSection(FILE* ElfFile)
+int displayNameSection(FILE* ElfFile)
 {
 
   Elf32_Ehdr ELFheader;
@@ -69,11 +68,11 @@ void displayNameSection(FILE* ElfFile)
 
 int main(int argc, char **argv) 
 {
-  uint32_t idx;
-  char* Header = NULL;
-  char* SectNames = NULL;
+  //uint32_t idx;
+  //char* Header = NULL;
+  //char* SectNames = NULL;
   Elf32_Ehdr elf1;
-  Elf32_Shdr elfSH;
+  //Elf32_Shdr elfSH;
   if(argc != 2) {
     printf("usage: %s <ELF_FILE>\n", argv[0]);
     exit(1);
@@ -85,7 +84,7 @@ int main(int argc, char **argv)
   }
 
  
-  Header = malloc(elf1.e_shentsize);
+  //Header = malloc(elf1.e_shentsize);
   if (1!= fread(&elf1, sizeof(elf1), 1, ElfFile)){
     printf("failed to read elf header");
     exit(1);
