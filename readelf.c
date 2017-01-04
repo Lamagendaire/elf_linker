@@ -6,9 +6,6 @@
 #include "util.h"
 #include "elf.h"
 
-#pragma pack(push,1)
-#pragma pack(pop)
-
 
 int displayHeaderInfos(FILE* ElfFile);
 int displayNameSection(FILE* ElfFile);
@@ -16,9 +13,7 @@ int displayNameSection(FILE* ElfFile);
 FILE* ElfFile = NULL;
 
 int displayHeaderInfos(FILE* ElfFile)
-{
-	//HEADER
-	//affiche les informations du header
+{//affiche les informations du header
 	Elf32_Ehdr elf1;
 	
 	
@@ -30,7 +25,7 @@ int displayHeaderInfos(FILE* ElfFile)
 	printf("\n===INFOS HEADER===");
 	printf("\nMagic  :");
 	for(i=0;i<15;++i) 
-	printf("   %x",elf1.e_ident[i]);
+	printf("%x",elf1.e_ident[i]);
 
 	char *class; 
 	if(elf1.e_ident[4]==2)
@@ -66,14 +61,14 @@ int displayHeaderInfos(FILE* ElfFile)
 }
 
 int displayNameSection(FILE* ElfFile)
-{
+{//affiche les noms de sections
 	
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader,ITERheader;
 	char *STR_buffer=NULL;
 	int iter_s; 
 	
-	//read header file
+	//Lecture du header
 	fseek( ElfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
 	printf("\n===NOM DES SECTIONS===\n");
