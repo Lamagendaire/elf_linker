@@ -90,96 +90,44 @@ int main(int argc, char **argv)
     printf("failed to read elf header");
     exit(1);
   }
-   int i; 
+  int i;
+  printf("\n===INFOS HEADER===");
+  printf("\nMagic  :");
+   for(i=0;i<15;++i) 
+	printf("   %x",elf1.e_ident[i]);
 
-    printf("\nMagic  :");
-    for(i=0;i<15;++i) 
-        printf("   %x",elf1.e_ident[i]);
-
-    char *class; 
-
-if(is_big_endian()){
-    if(elf1.e_ident[4]!=1){
-        reverse_4(elf1.e_version);
-        reverse_4(elf1.e_flags);
-        reverse_2(elf1.e_type);
-        reverse_2(elf1.e_machine);
-        reverse_2(elf1.e_ehsize);
-        reverse_2(elf1.e_phentsize);
-        reverse_2(elf1.e_phnum);
-        reverse_2(elf1.e_shstrndx);
-        reverse_2(elf1.e_entry);
-        reverse_2(elf1.e_phoff);
-        reverse_2(elf1.e_shoff);
-      }
-}
-else{
-  if(elf1.e_ident[4]!=1){
-        reverse_4(elf1.e_version);
-        reverse_4(elf1.e_flags);
-        reverse_2(elf1.e_type);
-        reverse_2(elf1.e_machine);
-        reverse_2(elf1.e_ehsize);
-        reverse_2(elf1.e_phentsize);
-        reverse_2(elf1.e_phnum);
-        reverse_2(elf1.e_shstrndx);
-        reverse_2(elf1.e_entry);
-        reverse_2(elf1.e_phoff);
-        reverse_2(elf1.e_shoff);
-      }
-}
+   char *class; 
     if(elf1.e_ident[4]==2)
-        class = "64";
+        class = "64 bits";
     if(elf1.e_ident[4]==1)
-        class = "32";
+        class = "32 bits";
     if(elf1.e_ident[4]==0)
       class = "Inavalid Class";
 
     if(elf1.e_machine!=0)
-      printf("\nPlatform:%"PRIu32,elf1.e_machine);
+      printf("\nPlateforme Cible: %"PRIu32,elf1.e_machine);
 
-    printf("\nTaille mot : %s\n",class);
+    printf("\nTaille des mots : %s",class);
     printf("\nType :");
     if(elf1.e_type == 1)
-        printf("Relocatable\n");
+        printf(" Relocatable");
     else if(elf1.e_type == 2)
-        printf("Executable\n");
+        printf(" Executable");
     else if(elf1.e_type == 3)
-        printf("Shared Object\n");
+        printf(" Shared Object");
     else
-        printf("Unknown\n");  
-
-    printf("\nStart of section headers : %"PRIu32,elf1.e_shoff); 
-    printf("\nSize of section table: %"PRIu32,elf1.e_shentsize);
-    printf("\nNumber of entry of the section table : %"PRIu32,elf1.e_shnum);
-    printf("\nEntry index : %"PRIu32,elf1.e_shstrndx);
-    printf("\nHeader size : %"PRIu32,elf1.e_ehsize);
-    printf("\n");
+        printf("Unknown");  
+	printf("\n\nTABLE DE SECTION");
+    printf("\n\t Offset : %"PRIu32,elf1.e_shoff); 
+    printf("\n\t Taille : %"PRIu32,elf1.e_shentsize);
+    printf(" (octets)\n\t Nombre d'entrée(s) : %"PRIu32,elf1.e_shnum);
+    printf("\n\nIndex de l'entrée : %i"PRIu32,elf1.e_shstrndx);
+    printf("\nTaille totale de l'header : %"PRIu32,elf1.e_ehsize);
+    printf(" (octets)\n");
     rewind(ElfFile);
-   // SectNames = malloc(elfSH.sh_size);
-   // //fseek(ElfFile, elfSH.sh_offset, SEEK_SET);
-   // fread(SectNames, 1, elfSH.sh_size, ElfFile);
-
-	// // read all section headers
- //  for (idx = 0; idx < elf1.e_shnum; idx++)
- //  {
- //    const char* name = "";
     
-	// //fseek(ElfFile, elf1.e_shoff + elf1.e_shstrndx * sizeof(elfSH), SEEK_SET);
-	// fread(&elfSH, 1, sizeof(elfSH), ElfFile);
-  
- // 	printf("%d",elfSH.sh_name);
-
-  
-	// //displaySection(name);
-	
- //    // print section name
- //    /*if (elfSH.sh_name);
- //      name = SectNames + elfSH.sh_name;
- //    printf("%2u %s\n", idx, name);*/
- //  }
-  
-  displayNameSection(ElfFile);
+    printf("\n===NOM DES SECTIONS===\n");
+	displayNameSection(ElfFile);
 } 
 
 
