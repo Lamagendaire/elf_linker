@@ -181,7 +181,7 @@ int afficherSec(FILE* ElfFile){
 		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
 		fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 		if ((STRheader.sh_type == SHT_STRTAB) && (STRheader.sh_addr == 0x00000000)){
-		  STR_buffer = (char *)malloc( STRheader.sh_size);
+		  STR_buffer = malloc( STRheader.sh_size);
 		  if (STR_buffer == NULL)
 		  {
 			printf("Impossible d'allouer la mémoire pour les noms de section\n");
@@ -199,7 +199,7 @@ int afficherSec(FILE* ElfFile){
 		{
 		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
 		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-		if (strcmp(nom_sect,ITERheader.sh_name) == 0){
+		if (strcmp(nom_sect,STR_buffer+ITERheader.sh_name) == 0){
 			sel = iter_s;
 			break;
 		}
@@ -220,10 +220,12 @@ int afficherSec(FILE* ElfFile){
 		
 	}
 	i=0;
-	while(i<STRheader.sh_size){
-		printf("%x",STR_buffer[i]);
-	i++;
+
+	for(i=0; i<STRheader.sh_size; i++)
+	{
+		printf("%02x",STR_buffer[i]);
 	}
+
 	free(STR_buffer);
 	rewind(ElfFile);
 	
@@ -254,5 +256,4 @@ int main(int argc, char **argv)
 	displayNameSection(ElfFile);
 	afficherSec(ElfFile);
 } 
-
 
