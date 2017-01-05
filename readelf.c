@@ -155,6 +155,8 @@ int afficherSec(FILE* ElfFile){
 	int numcar = 0;
 	int i = 0;
 	
+	printf("\n===AFFICHAGE CONTENU SECTION===\n");
+	
 	//Lecture du header
 	fseek( ElfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
@@ -210,10 +212,15 @@ int afficherSec(FILE* ElfFile){
 	}
 	//Lecture du Section Header selectionné
 	unsigned char *STR_buffer2=NULL;
-	STR_buffer2 = malloc(STRheader.sh_size);
+	int affichage_addr = 0;
+	
+	//allouer une taille taille suffisante pour les grandes tailles de sections
+	STR_buffer2 = malloc(STRheader.sh_size*100);
+	
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 	
+	//cas où la section est vide
 	if(STRheader.sh_size == 0){
 		printf("section vide");
 	}
@@ -224,10 +231,17 @@ int afficherSec(FILE* ElfFile){
 	}
 	i=0;
 
+	//affichage du contenu de la section
 	for(i=0; i<STRheader.sh_size; i++)
-	{
+	{	if(i % 16 == 0){					//affichage de l'addresse relative des contenus de la section
+			printf("\n0x%08x",affichage_addr);
+			affichage_addr = affichage_addr + 16;
+		}
+		if(i%4 == 0){			//espaces apres chaque 8 chiffres affiches
+			printf(" ");
+		}
 		printf("%02x",STR_buffer2[i]);
-	}
+	}printf("\n");
 
 	free(STR_buffer2);
 	rewind(ElfFile);
