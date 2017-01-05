@@ -12,9 +12,53 @@ int displayHeaderInfos(FILE* ElfFile);
 int displayNameSection(FILE* ElfFile);
 int afficherSec(FILE* ElfFile);
 int displaySymbolTable(FILE* ElfFile);
+int NameToIndex();
 
 
 FILE* ElfFile = NULL;
+
+int NameToIndex(char* nom_sect)
+{
+	Elf32_Ehdr ELFheader;
+	Elf32_Shdr STRheader,ITERheader;
+	char *STR_buffer=NULL;
+	int sel = 0;
+	int iter_s=0;
+
+	//find string section
+	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
+	{
+	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
+	if ((STRheader.sh_type == SHT_STRTAB) && (STRheader.sh_addr == 0x00000000)){
+		STR_buffer = malloc( STRheader.sh_size);
+		  if (STR_buffer == NULL)
+		  {
+			printf("Impossible d'allouer la mémoire pour les noms de section\n");
+			return -1;
+		  }
+		  fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
+		  fread( STR_buffer, STRheader.sh_size, 1, ElfFile);
+		  iter_s = ELFheader.e_shnum+1;
+		}
+	}
+		
+	//now iter and print segment names
+	fseek(ElfFile, 0, SEEK_SET);
+	for (iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
+	{
+	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+	fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+		if (strcmp(nom_sect,STR_buffer+ITERheader.sh_name) == 0 && sel ==0){
+			sel = iter_s;
+		}
+	}
+
+	free(STR_buffer);
+	rewind(ElfFile);
+	return sel;
+}
+
 
 int displayHeaderInfos(FILE* ElfFile)
 {//affiche les informations du header
@@ -164,10 +208,9 @@ int afficherSec(FILE* ElfFile){
 
 	char nom_sect[20];
 	int sel = 0;
-
+	
 	printf("nom ou numero de section a afficher:");
 	numcar = scanf("%s", nom_sect);
-	
 	
 	if (nom_sect[0] <= '9' && nom_sect[0] >= '0'){
 		while(i < numcar){
@@ -177,45 +220,13 @@ int afficherSec(FILE* ElfFile){
 	}
 	
 	else {
-		int iter_s;
-		//find string section
-		for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
-		{
-		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-		fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
-		if ((STRheader.sh_type == SHT_STRTAB) && (STRheader.sh_addr == 0x00000000)){
-		  STR_buffer = malloc( STRheader.sh_size);
-		  if (STR_buffer == NULL)
-		  {
-			printf("Impossible d'allouer la mémoire pour les noms de section\n");
-			return -1;
-		  }
-		  fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
-		  fread( STR_buffer, STRheader.sh_size, 1, ElfFile);
-		  iter_s = ELFheader.e_shnum+1;
-		}
-		}
-		
-		//now iter and print segment names
-		fseek(ElfFile, 0, SEEK_SET);
-		for (iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
-		{
-		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-		if (strcmp(nom_sect,STR_buffer+ITERheader.sh_name) == 0){
-			sel = iter_s;
-			break;
-		}
-		}
-
-		free(STR_buffer);
-		rewind(ElfFile);
+		sel=NameToIndex(nom_sect);
 	}
 	//Lecture du Section Header selectionné
 	unsigned char *STR_buffer2=NULL;
 	int affichage_addr = 0;
 	
-	//allouer une taille taille suffisante pour les grandes tailles de sections
+	//allouer une taille suffisante pour les grandes tailles de sections
 	STR_buffer2 = malloc(STRheader.sh_size*100);
 	
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
@@ -244,23 +255,65 @@ int afficherSec(FILE* ElfFile){
 		printf("%02x",STR_buffer2[i]);
 	}printf("\n");
 
+
 	free(STR_buffer2);
 	rewind(ElfFile);
-	
 	return 0;
 }
 
 int displaySymbolTable(FILE* ElfFile)
 {
-	printf("Hello!!!\n");
+	Elf32_Ehdr ELFheader;
+	Elf32_Shdr STRheader,ITERheader;
+	Elf32_Sym symb;
+	char *STR_buffer=NULL;
+	int indice = 0;
+	
+	fseek( ElfFile, 0, SEEK_SET );
+	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
+	indice = NameToIndex(".symtab");
+	
 }
+
+int displayRelocatableTable(FILE* ElfFile)
+{
+	Elf32_Ehdr ELFheader;
+	Elf32_Shdr STRheader,ITERheader;
+	Elf32_Rel rel;
+	Elf32_Rela rela;
+	char *STR_buffer=NULL;
+	int indice = 0;
+	
+	fseek( ElfFile, 0, SEEK_SET );	
+	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
+
+	indice = NameToIndex(".rel.text");
+
+	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+	for(int i=0;i<indice;i++){
+		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+		fseek( ElfFile, ITERheader.sh_size , SEEK_CUR );	
+	}
+	fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+	
+	fseek(ElfFile,ITERheader.e_shoff,SEEK_SET)
+	fread(&STRheader,ITERheader.sh_size,1, ElfFile);
+
+	fseek(ElfFile,STRheader.sh_offset,SEEK_SET);
+	fread( rel, sizeof(Elf32_Rel), 1, ElfFile);
+	
+	fseek(ElfFile,STRheader.sh_offset,SEEK_CUR);
+
+	
+	
+}
+
 
 int main(int argc, char **argv) 
 {
   //uint32_t idx;
   //char* Header = NULL;
-  //char* SectNames = NULL;
-
+	//char* SectNames = NULL;
   //Elf32_Shdr elfSH;
   if(argc != 2) {
     printf("usage: %s <ELF_FILE>\n", argv[0]);
@@ -297,8 +350,6 @@ int main(int argc, char **argv)
 				break;
 			}
 	}
-	
-		
 	
 } 
 
