@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include "util.h"
@@ -10,6 +11,7 @@
 int displayHeaderInfos(FILE* ElfFile);
 int displayNameSection(FILE* ElfFile);
 int afficherSec(FILE* ElfFile);
+
 
 FILE* ElfFile = NULL;
 
@@ -150,6 +152,9 @@ int afficherSec(FILE* ElfFile){
 	Elf32_Shdr STRheader,ITERheader;
 	char *STR_buffer=NULL;
 	
+	int numcar = 0;
+	int i = 0;
+	
 	//Lecture du header
 	fseek( ElfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
@@ -158,10 +163,14 @@ int afficherSec(FILE* ElfFile){
 	int sel = 0;
 
 	printf("nom ou numero de section a afficher:");
-	scanf("%s", nom_sect);
+	numcar = scanf("%s", nom_sect);
+	
 	
 	if (nom_sect[0] <= '9' && nom_sect[0] >= '0'){
-		sel = (int)nom_sect[0]-48;
+		while(i < numcar){
+			sel = (int)nom_sect[i]-48;
+			i++;
+		}
 	}
 	
 	else {
@@ -180,7 +189,7 @@ int afficherSec(FILE* ElfFile){
 		  }
 		  fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
 		  fread( STR_buffer, STRheader.sh_size, 1, ElfFile);
-		  iter_s=ELFheader.e_shnum+1;
+		  iter_s = ELFheader.e_shnum+1;
 		}
 		}
 		
@@ -190,16 +199,15 @@ int afficherSec(FILE* ElfFile){
 		{
 		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
 		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-		if (nom_sect == STR_buffer+ITERheader.sh_name){
+		if (strcmp(nom_sect,ITERheader.sh_name) == 0){
 			sel = iter_s;
-			break;			
+			break;
 		}
 		}
-		free( STR_buffer );
 		rewind(ElfFile);
-		return 0;
 	}
 	//Lecture du Section Header selectionné
+	STR_buffer = malloc(STRheader.sh_size);
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 	
@@ -208,9 +216,17 @@ int afficherSec(FILE* ElfFile){
 	}
 	else{
 		fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
-		fread( &STR_buffer,STRheader.sh_size,1,ElfFile );
+		fread( STR_buffer,STRheader.sh_size,1,ElfFile );
 		
 	}
+	i=0;
+	while(i<STRheader.sh_size){
+		printf("%x",STR_buffer[i]);
+	i++;
+	}
+	free(STR_buffer);
+	rewind(ElfFile);
+	
 	return 0;
 }
 
