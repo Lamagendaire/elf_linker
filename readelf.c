@@ -11,6 +11,7 @@
 int displayHeaderInfos(FILE* ElfFile);
 int displayNameSection(FILE* ElfFile);
 int afficherSec(FILE* ElfFile);
+int displaySymbolTable(FILE* ElfFile);
 
 
 FILE* ElfFile = NULL;
@@ -249,6 +250,10 @@ int afficherSec(FILE* ElfFile){
 	return 0;
 }
 
+int displaySymbolTable(FILE* ElfFile)
+{
+	printf("Hello!!!\n");
+}
 
 int main(int argc, char **argv) 
 {
@@ -266,11 +271,34 @@ int main(int argc, char **argv)
     perror("[E] Error opening file:");
     exit(1);
   }
+	int choix=100;
 
-
-    
-	displayHeaderInfos(ElfFile);
-	displayNameSection(ElfFile);
-	afficherSec(ElfFile);
+	while(choix != 0){
+		printf("====Menu===\n");
+		printf("Choisir:\n 0- Sortir\n 1- Afficher les informations du Header\n 2- Afficher la table des sections\n 3- Afficher une section\n 4- Afficher la table des symboles\n");
+		
+		scanf("%i", &choix);
+		switch(choix)
+		{
+			case 1:
+				displayHeaderInfos(ElfFile);
+				break;
+			case 2:
+				displayNameSection(ElfFile);
+				break;
+			case 3:
+				afficherSec(ElfFile);
+				break;
+			case 4:
+				displaySymbolTable(ElfFile);
+				break;
+			default:
+				printf("Le choix ne correspond pas\n");
+				break;
+			}
+	}
+	
+		
+	
 } 
 
