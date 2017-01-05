@@ -204,10 +204,13 @@ int afficherSec(FILE* ElfFile){
 			break;
 		}
 		}
+
+		free(STR_buffer);
 		rewind(ElfFile);
 	}
 	//Lecture du Section Header selectionné
-	STR_buffer = malloc(STRheader.sh_size);
+	unsigned char *STR_buffer2=NULL;
+	STR_buffer2 = malloc(STRheader.sh_size);
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 	
@@ -216,17 +219,17 @@ int afficherSec(FILE* ElfFile){
 	}
 	else{
 		fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
-		fread( STR_buffer,STRheader.sh_size,1,ElfFile );
+		fread( STR_buffer2,STRheader.sh_size,1,ElfFile );
 		
 	}
 	i=0;
 
 	for(i=0; i<STRheader.sh_size; i++)
 	{
-		printf("%02x",STR_buffer[i]);
+		printf("%02x",STR_buffer2[i]);
 	}
 
-	free(STR_buffer);
+	free(STR_buffer2);
 	rewind(ElfFile);
 	
 	return 0;
