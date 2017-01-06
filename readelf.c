@@ -25,6 +25,10 @@ int NameToIndex(char* nom_sect)
 	char *STR_buffer=NULL;
 	int sel = 0;
 	int iter_s=0;
+	//read header
+	fseek( ElfFile, 0, SEEK_SET );
+	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
+
 
 	//find string section
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
@@ -225,11 +229,10 @@ int afficherSec(FILE* ElfFile){
 	unsigned char *STR_buffer2=NULL;
 	int affichage_addr = 0;
 	
-	//allouer une taille suffisante pour les grandes tailles de sections
-	STR_buffer2 = malloc(STRheader.sh_size*100);
-	
+
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
+	STR_buffer2 = malloc(sizeof(char)*STRheader.sh_size);			//allouer une taille suffisante pour les grandes tailles de sections
 	
 	//cas où la section est vide
 	if(STRheader.sh_size == 0){
