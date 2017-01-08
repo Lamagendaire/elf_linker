@@ -17,6 +17,11 @@ int NameToIndex(char* nom_sect);
 
 FILE* ElfFile = NULL;
 
+//les 30 premiers codes de la table des codes de relocation ARM
+char * tableRelocationARMCode[]={"R_ARM-NONE","R_ARM_PC24","R_ARM_ABS32","R_ARM_REL32","R_ARM_LDR_PC_G0","R_ARM_ABS16","R_ARM_ABS12","R_ARM_THM_ABS5","R_ARM_ABS8","R_ARM_SBREL32",
+"R_ARM_THM_CALL","R_ARM_THM_PC8","R_ARM_BREL_ADJ","R_ARM_TLS_DESC","R_ARM_THM_SWI8","R_ARM_XPC25","R_ARM_THM_XPC22","R_ARM_TLS_DTPMOD32","R_ARM_TLS_DTPOFF32","R_ARM_TLS_TPOFF32",
+"R_ARM_COPY","R_ARM_GLOB_DAT","R_ARM_JUMP_SLOT","R_ARM_RELATIVE","R_ARM_GOTOFF32","R_ARM_BASE_PREL","R_ARM_GOT_BREL","R_ARM_PLT32","R_ARM_CALL","R_ARM_JUMP24","R_ARM_THM_JUMP24"};
+
 int NameToIndex(char* nom_sect)
 {
 	rewind(ElfFile);
@@ -58,7 +63,7 @@ int NameToIndex(char* nom_sect)
 			sel = iter_s;
 		}
 	}
-	printf("%d\n",sel);
+	// printf("%d\n",sel);
 	free(STR_buffer);
 	rewind(ElfFile);
 	return sel;
@@ -127,26 +132,22 @@ int displayNameSection(FILE* ElfFile)
 	fseek( ElfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
 	printf("\n===TABLE DES SECTIONS===\n");
-	//find string section
-	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
-	{
-	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+	
+    //find string section
+    int indexTablestrSection = NameToIndex(".shstrtab");
+	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indexTablestrSection), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
-	if ((STRheader.sh_type == SHT_STRTAB) && 
-	  (STRheader.sh_addr == 0x00000000))
-	{
+
+    //printf("coucou");
     STR_buffer_name = (char *)malloc( STRheader.sh_size);
 
-	  if (STR_buffer_name == NULL) 
-	  {
-		printf("Impossible d'allouer la mémoire pour les noms de section\n");
-		return -1;
-	  }
-	  fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
-	  fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
-	  iter_s=ELFheader.e_shnum+1;
-	}
-	}
+    if (STR_buffer_name == NULL) 
+    {
+    printf("Impossible d'allouer la mémoire pour les noms de section\n");
+    return -1;
+    }
+    fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
+    fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
 
 	//now iter and print segment names
 	fseek(ElfFile, 0, SEEK_SET);
@@ -268,26 +269,48 @@ int displaySymbolTable(FILE* ElfFile)
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader,ITERheader;
 	Elf32_Sym symb;
-	char *STR_buffer=NULL;
-	char *STR_buffer2=NULL;
+    char *STR_buffer_name=NULL;
 	int indice;
 	int i;
 	int idx;
 	int num_sym;
+    char * type=NULL;
+    char * link=NULL;
+    char buf[12];
+    char SHNDX[10];
+    char other[10];
 
-	fseek(ElfFile, 0, SEEK_SET);
-	fread(&ELFheader, sizeof(Elf32_Ehdr),1,ElfFile);
+    printf("\n===TABLE DES SYMBOLES===\n");
 
+    //lecture header du fichier
+    fseek(ElfFile, 0, SEEK_SET);
+    fread(&ELFheader, sizeof(Elf32_Ehdr),1,ElfFile);
+
+    //Lecture table des noms de symboles
+    int indexTablestrSymbole = NameToIndex(".strtab");
+    fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indexTablestrSymbole), SEEK_SET);
+    fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
+
+    STR_buffer_name = (char *)malloc( STRheader.sh_size);
+
+    if (STR_buffer_name == NULL) 
+    {
+    printf("Impossible d'allouer la mémoire pour les noms de symboles\n");
+    return -1;
+    }
+    fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
+    fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
+	
+    //Lecture de l'en tete de section symbole
 	indice = NameToIndex(".symtab");
-	printf("DEBUG");
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indice), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 
 	fseek(ElfFile, STRheader.sh_offset, SEEK_SET);
-	fread(&symb, sizeof(Elf32_Sym),1,ElfFile);
 
 	//for each entry in the symbol table
-for(i=0; i<STRheader.sh_entsize; i++)
+    printf("NUMERO| NAME     | TYPE     | VALEUR     | TAILLE     | LIEN   | SHNDX | OTHER \n");
+for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Sym)); i++)
 {
     //read the current symbol
     fread(&symb,sizeof(Elf32_Sym),1,ElfFile);
@@ -295,57 +318,73 @@ for(i=0; i<STRheader.sh_entsize; i++)
 
     //multiple lines to get formatting correct
     //prints index in brackets right aligned
-    char buf[12];
+    //numero alias buf
     sprintf(buf, "[%d]", i);
-    printf("%10s", buf);
 
-    //value
-    printf("  0x%.8x", symb.st_value);
-    //size
-    printf(" 0x%.8x", symb.st_size);
-
-    //type
+     //type
     switch (ELF32_ST_TYPE(symb.st_info)) {
         case 0:
-            printf("  NOTY");
+            type="NOTYPE";
             break;
         case 1:
-            printf("  OBJT");
+            type="OBJECT";
             break;
         case 2:
-            printf("  FUNC");
+            type="FUNCTION";
             break;
         case 3:
-            printf("  SECT");
+            type="SECTION";
             break;
         case 4:
-            printf("  FILE");
+            type="FILE";
             break;
-
         default:
             break;
     }
 
-    //bind
+     //bind
     switch(ELF32_ST_BIND(symb.st_info))
     {
-        case 0: printf(" LOCL");
+        case 0: 
+            link="LOCAL";
             break;
-        case 1: printf(" GLOB");
+        case 1: 
+            link="GLOBAL";
             break;
-        case 2: printf(" WEAK");
+        /*case 2: printf(" WEAK");
             break;
-        case 3: printf("  NUM");
-            break;
-
+        case 13: printf("LOPROC");
+            break;*/
         default:
             break;
     }
+     //shndx
+    if(symb.st_shndx == 0)
+    {
+        sprintf(SHNDX, "%s", "UND");
+    }
+    else if(symb.st_shndx>=10)
+    {
+        sprintf(SHNDX, "%s", "ABS");
+    }
+    else
+    {
+        sprintf(SHNDX, "%d", symb.st_shndx);
+    }
 
-    //TODO: oth
-    //TODO: ver
-    //TODO: shndx
-    //TODO: name
+    //other
+     if(symb.st_other==0)
+    {
+        sprintf(other, "%s","DEFAULT");
+    }
+    else
+    {
+        sprintf(other," %d ",symb.st_other);
+    }
+
+
+    printf("%5s | %9s| %8s | 0x%.8x | 0x%.8x | %6s | %5s | %5s", buf, STR_buffer_name+symb.st_name, type, symb.st_value, symb.st_size, link, SHNDX, other);
+    printf("\n");
 
 }
 	
@@ -354,33 +393,37 @@ for(i=0; i<STRheader.sh_entsize; i++)
 int displayRelocatableTable(FILE* ElfFile)
 {
 
-	// Elf32_Ehdr ELFheader;
-	// Elf32_Shdr STRheader,ITERheader;
-	// Elf32_Rel rel;
-	// Elf32_Rela rela;
-	// char *STR_buffer=NULL;
-	// int indice = 0;
-	
-	// fseek( ElfFile, 0, SEEK_SET );	
-	// fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
+	Elf32_Ehdr ELFheader;
+	Elf32_Shdr STRheader,ITERheader;
+	Elf32_Rel rel;
+	Elf32_Rela rela;
+	char *STR_buffer=NULL;
+	int i;
+    int iter_s=0;
 
-	// indice = NameToIndex(".rel.text");
+    printf("=========TABLE DE RELOCATION=========\n");
+	
+    //récupération header
+	fseek( ElfFile, 0, SEEK_SET );	
+	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, ElfFile);
 
-	// fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-	// for(int i=0;i<indice;i++){
-	// 	fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-	// 	fseek( ElfFile, ITERheader.sh_size , SEEK_CUR );	
-	// }
-	// fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-	
-	// fseek(ElfFile,ITERheader.e_shoff,SEEK_SET)
-	// fread(&STRheader,ITERheader.sh_size,1, ElfFile);
+    printf("DECALAGE    | TYPE            | INDEX ENTREE\n");
 
-	// fseek(ElfFile,STRheader.sh_offset,SEEK_SET);
-	// fread( rel, sizeof(Elf32_Rel), 1, ElfFile);
-	
-	// fseek(ElfFile,STRheader.sh_offset,SEEK_CUR);
-	
+    //les sections de type SHT_REL
+   for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
+    {
+        fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+        fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
+        if(STRheader.sh_type==SHT_REL)
+        {
+            fseek(ElfFile, STRheader.sh_offset, SEEK_SET);
+            for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Rel)); i++)
+            {
+                fread(&rel,sizeof(Elf32_Rel),1,ElfFile);
+                printf(" 0x%.8x | %15s | %d \n", rel.r_offset, tableRelocationARMCode[ELF32_R_TYPE(rel.r_info)], ELF32_R_SYM(rel.r_info));
+            }
+        }
+    }	
 }
 
 
@@ -403,11 +446,13 @@ int main(int argc, char **argv)
 
 	while(choix != 0){
 		printf("====Menu===\n");
-		printf("Choisir:\n 0- Sortir\n 1- Afficher les informations du Header\n 2- Afficher la table des sections\n 3- Afficher une section\n 4- Afficher la table des symboles\n 5- NameToIndex de .symtab\n");
+		printf("Choisir:\n 0- Sortir\n 1- Afficher les informations du Header\n 2- Afficher la table des sections\n 3- Afficher une section\n 4- Afficher la table des symboles\n 5- Afficher la table de relocation\n");
 		
 		scanf("%i", &choix);
 		switch(choix)
 		{
+            case 0:
+                break;
 			case 1:
 				displayHeaderInfos(ElfFile);
 				break;
@@ -421,7 +466,7 @@ int main(int argc, char **argv)
 				displaySymbolTable(ElfFile);
 				break;
 			case 5:
-				NameToIndex(".symtab");
+				displayRelocatableTable(ElfFile);
 				break;
 			default:
 				printf("Le choix ne correspond pas\n");
