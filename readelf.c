@@ -14,7 +14,6 @@ int afficherSec(FILE* ElfFile);
 int displaySymbolTable(FILE* ElfFile);
 int NameToIndex(char* nom_sect);
 
-
 FILE* ElfFile = NULL;
 
 //les 30 premiers codes de la table des codes de relocation ARM
@@ -54,7 +53,7 @@ int NameToIndex(char* nom_sect)
 		}
 	}
 		
-	//now iter and print segment names
+	//iter and print segment names
 	fseek(ElfFile, 0, SEEK_SET);
 	for (iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
 	{
@@ -65,7 +64,7 @@ int NameToIndex(char* nom_sect)
 				sel = iter_s;
 			}
 	}
-	// printf("%d\n",sel);
+
 	free(STR_buffer);
 	rewind(ElfFile);
 	return sel;
@@ -140,7 +139,6 @@ int displayNameSection(FILE* ElfFile)
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indexTablestrSection), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 
-    //printf("coucou");
     STR_buffer_name = (char *)malloc( STRheader.sh_size);
 
     if (STR_buffer_name == NULL) 
@@ -151,7 +149,7 @@ int displayNameSection(FILE* ElfFile)
     fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
     fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
 
-	//now iter and print segment names
+	//iter and print segment names
 	fseek(ElfFile, 0, SEEK_SET);
   	printf("NUMERO | NAME           | TYPE         | OFFSET | ADDR | SIZE | ENTSIZE| LINK | INFO | ADDRALIGN| FLAGS\n");
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
@@ -245,7 +243,7 @@ int afficherSec(FILE* ElfFile)
 	//cas où la section est vide
 	if(STRheader.sh_size == 0)
 	{
-		printf("section vide");
+		printf("section vide"); //todo - cas ou num/nom de section est invalide
 	}
 	else
 	{
@@ -257,12 +255,12 @@ int afficherSec(FILE* ElfFile)
 	//affichage du contenu de la section
 	for(i=0; i<STRheader.sh_size; i++)
 	{	if(i % 16 == 0)
-		{					//affichage de l'addresse relative des contenus de la section
+		{	//affichage de l'addresse relative des contenus de la section
 			printf("\n0x%08x",affichage_addr);
 			affichage_addr = affichage_addr + 16;
 		}
 		if(i%4 == 0)
-		{			//espaces apres chaque 8 chiffres affiches
+		{	//espaces apres chaque 8 chiffres affiches
 			printf(" ");
 		}
 		printf("%02x",STR_buffer2[i]);
@@ -326,8 +324,6 @@ int displaySymbolTable(FILE* ElfFile)
 	    fread(&symb,sizeof(Elf32_Sym),1,ElfFile);
 			idx=symb.st_name;
 
-	    //multiple lines to get formatting correct
-	    //prints index in brackets right aligned
 	    //numero alias buf
 	    sprintf(buf, "[%d]", i);
 
@@ -369,6 +365,7 @@ int displaySymbolTable(FILE* ElfFile)
 	        default:
 	            break;
 	    }
+
 	     //shndx
 	    if(symb.st_shndx == 0)
 	    {
@@ -440,10 +437,7 @@ int displayRelocatableTable(FILE* ElfFile)
 
 int main(int argc, char **argv) 
 {
-  //uint32_t idx;
-  //char* Header = NULL;
-	//char* SectNames = NULL;
-  //Elf32_Shdr elfSH;
+
   if(argc != 2) {
     printf("usage: %s <ELF_FILE>\n", argv[0]);
     exit(1);
