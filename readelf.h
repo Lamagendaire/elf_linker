@@ -41,10 +41,10 @@ typedef struct {
 */
 
 
-int NameToIndex(char* nom_sect,FILE* ElfFile);
-Elf32_Ehdr readHeader(FILE* ElfFile);
-Section* readSectionTable(FILE* ElfFile);
-Symbole* readSymboleTable(FILE* ElfFile);
-Elf32_Rel* readRelocatableTable(FILE* ElfFile);
-ElfFile ElfConstructor(FILE* ElfFile);
+int NameToIndex(char* nom_sect,FILE* elfFile);
+Elf32_Ehdr readHeader(FILE* elfFile);
+Section* readSectionTable(FILE* elfFile);
+Symbole* readSymboleTable(FILE* elfFile);
+Elf32_Rel* readRelocatableTable(FILE* elfFile);
+ElfFile ElfConstructor(FILE* elfFile);
 
