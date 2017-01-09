@@ -9,6 +9,11 @@ typedef struct
         Elf32_Shdr  headerSec;
         char * contenuSec;
 } Section;
+typedef struct 
+{
+        char * nomSymb;
+        Elf32_Sym  headerSymb; 
+}Symbole;
 
 
 typedef struct 
@@ -17,7 +22,7 @@ typedef struct
         Elf32_Ehdr headerElf;
         Section * tabSections;
         int sizeSections;
-        char * tableSymb;
+        Symbole*  tableSymb;
         Elf32_Shdr * tabRelocation;
 
 }ElfFile;
