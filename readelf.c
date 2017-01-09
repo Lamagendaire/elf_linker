@@ -36,11 +36,12 @@ int NameToIndex(char* nom_sect)
 
 
 	//find string section
-	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
+	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
 	{
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
-	if ((STRheader.sh_type == SHT_STRTAB) && (STRheader.sh_addr == 0x00000000)){
+	if ((STRheader.sh_type == SHT_STRTAB) && (STRheader.sh_addr == 0x00000000))
+	{
 		STR_buffer = malloc( STRheader.sh_size);
 		  if (STR_buffer == NULL)
 		  {
@@ -57,11 +58,12 @@ int NameToIndex(char* nom_sect)
 	fseek(ElfFile, 0, SEEK_SET);
 	for (iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
 	{
-	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-	fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-		if (strcmp(nom_sect,STR_buffer+ITERheader.sh_name) == 0 && sel ==0){
-			sel = iter_s;
-		}
+		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+			if (strcmp(nom_sect,STR_buffer+ITERheader.sh_name) == 0 && sel ==0)
+			{
+				sel = iter_s;
+			}
 	}
 	// printf("%d\n",sel);
 	free(STR_buffer);
@@ -74,8 +76,8 @@ int displayHeaderInfos(FILE* ElfFile)
 {//affiche les informations du header
 	Elf32_Ehdr elf1;
 	
-	
-	if (1!= fread(&elf1, sizeof(elf1), 1, ElfFile)){
+	if (1!= fread(&elf1, sizeof(elf1), 1, ElfFile))
+	{
 		printf("failed to read elf header");
 		return -1;
 	}
@@ -118,15 +120,15 @@ int displayHeaderInfos(FILE* ElfFile)
 }
 
 int displayNameSection(FILE* ElfFile)
-{//affiche les noms de sections
+{	//affiche les noms de sections
 	
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader,ITERheader;
 	char *STR_buffer_name=NULL;
 	int iter_s; 
 	
-  char* type="";
-  char* flags="";
+	char* type="";
+	char* flags="";
 
 	//Lecture du header
 	fseek( ElfFile, 0, SEEK_SET );
@@ -143,59 +145,63 @@ int displayNameSection(FILE* ElfFile)
 
     if (STR_buffer_name == NULL) 
     {
-    printf("Impossible d'allouer la mémoire pour les noms de section\n");
-    return -1;
+	    printf("Impossible d'allouer la mémoire pour les noms de section\n");
+	    return -1;
     }
     fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
     fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
 
 	//now iter and print segment names
 	fseek(ElfFile, 0, SEEK_SET);
-  printf("NUMERO | NAME           | TYPE         | OFFSET | ADDR | SIZE | ENTSIZE| LINK | INFO | ADDRALIGN| FLAGS\n");
+  	printf("NUMERO | NAME           | TYPE         | OFFSET | ADDR | SIZE | ENTSIZE| LINK | INFO | ADDRALIGN| FLAGS\n");
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
 	{
-	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-	fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
-  switch(ITERheader.sh_type)
-  {
-    case 0: type = "NULL";
-            break;
-    case 1: type = "PROGBITS";
-            break;
-    case 2: type = "SYMTAB";
-            break;
-    case 3: type = "STRTAB";
-            break;
-    case 4: type = "RELA";
-            break;
-    case 5: type = "HASH";
-            break;
-    case 6: type = "DYNAMIC";
-            break;
-    case 7: type = "NOTE";
-            break;
-    case 8: type = "NOBITS";
-            break;
-    case 9: type = "REL";
-            break;
-    case 10: type = "SHLIB";
-            break;
-    case 11: type = "DYNSYM";
-            break;
-    default:
-            break;
-  }
-	if (1==1)
-	{
-	  printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, STR_buffer_name+ITERheader.sh_name , type ,ITERheader.sh_offset , ITERheader.sh_addr, ITERheader.sh_size, ITERheader.sh_entsize, ITERheader.sh_link, ITERheader.sh_info, ITERheader.sh_addralign, ITERheader.sh_flags);
-	}
+		fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+		fread( &ITERheader, ELFheader.e_shentsize, 1, ElfFile );
+		switch(ITERheader.sh_type)
+		{
+			case 0: type = "NULL";
+		            break;
+		    case 1: type = "PROGBITS";
+		            break;
+		    case 2: type = "SYMTAB";
+		            break;
+		    case 3: type = "STRTAB";
+		            break;
+		    case 4: type = "RELA";
+		            break;
+		    case 5: type = "HASH";
+		            break;
+		    case 6: type = "DYNAMIC";
+		            break;
+		    case 7: type = "NOTE";
+		            break;
+		    case 8: type = "NOBITS";
+		            break;
+		    case 9: type = "REL";
+		            break;
+		    case 10: type = "SHLIB";
+		            break;
+		    case 11: type = "DYNSYM";
+		            break;
+		    default:
+		            break;
+		}
+		if (1==1)
+		{
+		  printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, 
+		  	STR_buffer_name+ITERheader.sh_name , type ,ITERheader.sh_offset , ITERheader.sh_addr, 
+		  	ITERheader.sh_size, ITERheader.sh_entsize, ITERheader.sh_link, 
+		  	ITERheader.sh_info, ITERheader.sh_addralign, ITERheader.sh_flags);
+		}
 	}	
 	free( STR_buffer_name );
 	rewind(ElfFile);
 	return 0;
 }
 
-int afficherSec(FILE* ElfFile){
+int afficherSec(FILE* ElfFile)
+{
 	
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader,ITERheader;
@@ -216,48 +222,52 @@ int afficherSec(FILE* ElfFile){
 	printf("nom ou numero de section a afficher:");
 	numcar = scanf("%s", nom_sect);
 	
-	if (nom_sect[0] <= '9' && nom_sect[0] >= '0'){
-		while(i < numcar){
+	if (nom_sect[0] <= '9' && nom_sect[0] >= '0')
+	{
+		while(i < numcar)
+		{
 			sel = (int)nom_sect[i]-48;
 			i++;
 		}
 	}
-	
-	else {
+	else
+	{
 		sel=NameToIndex(nom_sect);
 	}
 	//Lecture du Section Header selectionné
 	unsigned char *STR_buffer2=NULL;
 	int affichage_addr = 0;
 	
-
 	fseek( ElfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*sel), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, ElfFile );
 	STR_buffer2 = malloc(sizeof(char)*STRheader.sh_size);			//allouer une taille suffisante pour les grandes tailles de sections
 	
 	//cas où la section est vide
-	if(STRheader.sh_size == 0){
+	if(STRheader.sh_size == 0)
+	{
 		printf("section vide");
 	}
-	else{
+	else
+	{
 		fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
 		fread( STR_buffer2,STRheader.sh_size,1,ElfFile );
-		
 	}
 	i=0;
 
 	//affichage du contenu de la section
 	for(i=0; i<STRheader.sh_size; i++)
-	{	if(i % 16 == 0){					//affichage de l'addresse relative des contenus de la section
+	{	if(i % 16 == 0)
+		{					//affichage de l'addresse relative des contenus de la section
 			printf("\n0x%08x",affichage_addr);
 			affichage_addr = affichage_addr + 16;
 		}
-		if(i%4 == 0){			//espaces apres chaque 8 chiffres affiches
+		if(i%4 == 0)
+		{			//espaces apres chaque 8 chiffres affiches
 			printf(" ");
 		}
 		printf("%02x",STR_buffer2[i]);
-	}printf("\n");
-
+	}
+	printf("\n");
 
 	free(STR_buffer2);
 	rewind(ElfFile);
@@ -295,8 +305,8 @@ int displaySymbolTable(FILE* ElfFile)
 
     if (STR_buffer_name == NULL) 
     {
-    printf("Impossible d'allouer la mémoire pour les noms de symboles\n");
-    return -1;
+	    printf("Impossible d'allouer la mémoire pour les noms de symboles\n");
+	    return -1;
     }
     fseek( ElfFile, STRheader.sh_offset, SEEK_SET);
     fread( STR_buffer_name, STRheader.sh_size, 1, ElfFile);
@@ -310,83 +320,84 @@ int displaySymbolTable(FILE* ElfFile)
 
 	//for each entry in the symbol table
     printf("NUMERO| NAME     | TYPE     | VALEUR     | TAILLE     | LIEN   | SHNDX | OTHER \n");
-for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Sym)); i++)
-{
-    //read the current symbol
-    fread(&symb,sizeof(Elf32_Sym),1,ElfFile);
-		idx=symb.st_name;
+	for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Sym)); i++)
+	{
+	    //read the current symbol
+	    fread(&symb,sizeof(Elf32_Sym),1,ElfFile);
+			idx=symb.st_name;
 
-    //multiple lines to get formatting correct
-    //prints index in brackets right aligned
-    //numero alias buf
-    sprintf(buf, "[%d]", i);
+	    //multiple lines to get formatting correct
+	    //prints index in brackets right aligned
+	    //numero alias buf
+	    sprintf(buf, "[%d]", i);
 
-     //type
-    switch (ELF32_ST_TYPE(symb.st_info)) {
-        case 0:
-            type="NOTYPE";
-            break;
-        case 1:
-            type="OBJECT";
-            break;
-        case 2:
-            type="FUNCTION";
-            break;
-        case 3:
-            type="SECTION";
-            break;
-        case 4:
-            type="FILE";
-            break;
-        default:
-            break;
-    }
+	     //type
+	    switch (ELF32_ST_TYPE(symb.st_info))
+	    {
+	        case 0:
+	            type="NOTYPE";
+	            break;
+	        case 1:
+	            type="OBJECT";
+	            break;
+	        case 2:
+	            type="FUNCTION";
+	            break;
+	        case 3:
+	            type="SECTION";
+	            break;
+	        case 4:
+	            type="FILE";
+	            break;
+	        default:
+	            break;
+	    }
 
-     //bind
-    switch(ELF32_ST_BIND(symb.st_info))
-    {
-        case 0: 
-            link="LOCAL";
-            break;
-        case 1: 
-            link="GLOBAL";
-            break;
-        /*case 2: printf(" WEAK");
-            break;
-        case 13: printf("LOPROC");
-            break;*/
-        default:
-            break;
-    }
-     //shndx
-    if(symb.st_shndx == 0)
-    {
-        sprintf(SHNDX, "%s", "UND");
-    }
-    else if(symb.st_shndx>=10)
-    {
-        sprintf(SHNDX, "%s", "ABS");
-    }
-    else
-    {
-        sprintf(SHNDX, "%d", symb.st_shndx);
-    }
+	     //bind
+	    switch(ELF32_ST_BIND(symb.st_info))
+	    {
+	        case 0: 
+	            link="LOCAL";
+	            break;
+	        case 1: 
+	            link="GLOBAL";
+	            break;
+	        /*case 2: printf(" WEAK");
+	            break;
+	        case 13: printf("LOPROC");
+	            break;*/
+	        default:
+	            break;
+	    }
+	     //shndx
+	    if(symb.st_shndx == 0)
+	    {
+	        sprintf(SHNDX, "%s", "UND");
+	    }
+	    else if(symb.st_shndx>=10)
+	    {
+	        sprintf(SHNDX, "%s", "ABS");
+	    }
+	    else
+	    {
+	        sprintf(SHNDX, "%d", symb.st_shndx);
+	    }
 
-    //other
-     if(symb.st_other==0)
-    {
-        sprintf(other, "%s","DEFAULT");
-    }
-    else
-    {
-        sprintf(other," %d ",symb.st_other);
-    }
+	    //other
+	     if(symb.st_other==0)
+	    {
+	        sprintf(other, "%s","DEFAULT");
+	    }
+	    else
+	    {
+	        sprintf(other," %d ",symb.st_other);
+	    }
 
 
-    printf("%5s | %9s| %8s | 0x%.8x | 0x%.8x | %6s | %5s | %5s", buf, STR_buffer_name+symb.st_name, type, symb.st_value, symb.st_size, link, SHNDX, other);
-    printf("\n");
+	    printf("%5s | %9s| %8s | 0x%.8x | 0x%.8x | %6s | %5s | %5s", buf, STR_buffer_name+symb.st_name, type, symb.st_value, symb.st_size, link, SHNDX, other);
+	    printf("\n");
 
-}
+	}
 	
 }
 
