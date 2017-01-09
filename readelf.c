@@ -1,3 +1,6 @@
+#ifndef READELF_C
+#define READELF_C
+
 #include "readelf.h"
 
 Elf32_Ehdr readHeader(FILE* elfFile)
@@ -195,3 +198,5 @@ ElfFile ElfConstructor(FILE* elfFile)
 	elf.tableRelocation = readRelocatableTable(elfFile);
 	return elf;
 }
+#endif
+

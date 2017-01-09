@@ -1,3 +1,6 @@
+#ifndef READELF_H
+#define READELF_H
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -7,13 +10,13 @@
 #include "util.h"
 #include <elf.h>
 
-
 typedef struct 
 {//Section complète (nom, header et contenu)
         char * nomSec;
         Elf32_Shdr  headerSec;
         char * contenuSec;
 } Section;
+
 typedef struct 
 {
         char * nomSymb;
@@ -22,7 +25,7 @@ typedef struct
 
 
 typedef struct 
-{//Fichier ELF (header, sections, symboles, reloactions)
+{		//Fichier ELF (header, sections, symboles, reloactions)
         FILE * fichierElf;
         Elf32_Ehdr headerElf;
         Section * tableSections;
@@ -31,15 +34,12 @@ typedef struct
 
 }ElfFile;
 
-
-
 /*
 typedef struct {
         ElfFile * ElfFile1;
         ElfFile * ElfFile2;
 } LinkedFiles;
 */
-
 
 int NameToIndex(char* nom_sect,FILE* elfFile);
 Elf32_Ehdr readHeader(FILE* elfFile);
@@ -48,3 +48,4 @@ Symbole* readSymboleTable(FILE* elfFile);
 Elf32_Rel* readRelocatableTable(FILE* elfFile);
 ElfFile ElfConstructor(FILE* elfFile);
 
+#endif

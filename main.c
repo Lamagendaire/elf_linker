@@ -6,31 +6,38 @@
 #include <inttypes.h>
 #include "util.h"
 #include "elf.h"
-// #include "display.h"
+#include "display.h"
+#include "readelf.h"
+
+
 
 int main(int argc, char **argv) 
-{
-	FILE* ElfFile = NULL;
-	FILE* ElfFile2 = NULL;	
+{	
+	ElfFile elffile;
+	ElfFile elffile2;
+
 
   if(argc != 3 && argc != 2  ) {
     printf("usage: %s <ELF_FILE>\n", argv[0]);
     exit(1);
   }
 
-  if((ElfFile = fopen(argv[1], "r")) == NULL) {
-    perror("[E] Error opening file:");
+//si argument 1 est pas un fichier-> retourne erreur
+  if((elffile.fichierElf = fopen(argv[1], "r")) == NULL) {
+    perror("[E] Error opening file ");
     exit(1);
   }
 
-  if((ElfFile2 = fopen(argv[2], "r")) == NULL) {
+//si argument 2 est pas un fichier -> vérifier si option -display
+	if((elffile2.fichierElf = fopen(argv[2], "r")) == NULL) {
   		if(strcmp(argv[2],"-display")==0)
-  		{  			
-  				displayMenu(ElfFile);
-  				//printf("Afficher");
+  		{
+  				displayMenu(elffile.fichierElf);
+  				//printf("afficher");
   		}
-  	}
+	}
 
+//sinon (c'est que c'est un fichier) -> fusion des deux fichiers
   else{
   	printf("Fusion des 2 fichiers");
   }
