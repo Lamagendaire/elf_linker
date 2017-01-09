@@ -34,14 +34,17 @@ Section* readSectionTable(FILE* elfFile)
 
 	//iter and print segment names
 	fseek(elfFile, 0, SEEK_SET);
+	sect = malloc(ELFheader.e_shnum*sizeof(Section));
+	
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
 	{
 		fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
 		fread( &ITERheader, ELFheader.e_shentsize, 1, elfFile );
-		sect[iter_s].nomSec = STR_buffer_name+ITERheader.sh_name;
-		sect[iter_s].headerSec = ITERheader;
+		sect[iter_s].nomSec = STR_buffer_name+ITERheader.sh_name; 	//nom
+		sect[iter_s].headerSec = ITERheader; //header
+		sect[iter_s].contenuSec = malloc(sect[iter_s].headerSec.sh_size);						
 		fseek( elfFile, sect[iter_s].headerSec.sh_offset, SEEK_SET);
-		fread( sect[iter_s].contenuSec,sect[iter_s].headerSec.sh_size,1,elfFile );
+		fread( sect[iter_s].contenuSec,sect[iter_s].headerSec.sh_size,1,elfFile ); //contenu
 	}
 	
 
@@ -104,7 +107,7 @@ Symbole* readSymboleTable(FILE* elfFile)
 	Elf32_Ehdr ELFheader;
 	Elf32_Shdr STRheader;
 	Elf32_Sym symb;
-	Symbole * sym = NULL;
+	
     char *STR_buffer_name=NULL;
 	int i;
 
@@ -128,11 +131,11 @@ Symbole* readSymboleTable(FILE* elfFile)
 	int indice = NameToIndex(".symtab", elfFile);
 	fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indice), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, elfFile );
-
+	
 	fseek(elfFile, STRheader.sh_offset, SEEK_SET);
 
 	//for each entry in the symbol table
-
+	Symbole * sym = malloc((STRheader.sh_size/sizeof(Elf32_Sym))*sizeof(Symbole));
 	for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Sym)); i++)
 	{
 	    //read the current symbol
@@ -157,7 +160,7 @@ Elf32_Rel* readRelocatableTable(FILE* elfFile)
     //récupération header
 	fseek( elfFile, 0, SEEK_SET );	
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, elfFile);
-
+	rela= malloc(ELFheader.e_shnum* sizeof(Elf32_Rel));
 
     //les sections de type SHT_REL
    for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
@@ -180,10 +183,15 @@ Elf32_Rel* readRelocatableTable(FILE* elfFile)
 ElfFile ElfConstructor(FILE* elfFile)
 {
 	ElfFile elf;
+	//printf("\n==ELFFILE==");
 	elf.fichierElf = elfFile;
+	//printf("\nfichier chargé");
 	elf.headerElf = readHeader(elfFile);
+	//printf("\nheader chargé");
 	elf.tableSections = readSectionTable(elfFile);
+	//printf("\nsections chargé");
 	elf.tableSymb = readSymboleTable(elfFile);
+	//printf("\nsymb chargé");
 	elf.tableRelocation = readRelocatableTable(elfFile);
 	return elf;
 }
