@@ -1,4 +1,4 @@
-#include "readtemp.h"
+#include "readelf.h"
 
 Elf32_Ehdr readHeader(FILE* elfFile)
 {
