@@ -251,10 +251,6 @@ void displayMenu(FILE* elffile_o)
 {
    int choix=100;
 	ElfFile elffile = ElfConstructor(elffile_o);
-	elffile.headerElf = readHeader(elffile_o);
-	elffile.tableSections = readSectionTable(elffile_o);
-	elffile.tableSymb = readSymboleTable(elffile_o);
-	elffile.tableRelocation = readRelocatableTable(elffile_o);
 	
 	
 	 while(choix != 0){

@@ -8,6 +8,7 @@
 #include "elf.h"
 #include "display.h"
 #include "readelf.h"
+#include "fusionelf.h"
 
 
 
@@ -15,6 +16,7 @@ int main(int argc, char **argv)
 {	
 	ElfFile elffile;
 	ElfFile elffile2;
+	ElfFile elffusion;
 
 
   if(argc != 3 && argc != 2  ) {
@@ -39,6 +41,11 @@ int main(int argc, char **argv)
 
 //sinon (c'est que c'est un fichier) -> fusion des deux fichiers
   else{
+	elffile = ElfConstructor(elffile.fichierElf);
+	elffile2.fichierElf = fopen(argv[2], "r");
+	elffile2 = ElfConstructor(fopen(argv[2],"r"));
+
   	printf("Fusion des 2 fichiers");
+  	elffusion=fusionProgBit(elffile,elffile2);
   }
 }
