@@ -13,13 +13,12 @@ void displaySection(ElfFile elf1)
 	int i=0;
 	int affichage_addr=0;
 	int choix =  0;
-	char* nom_sect= NULL;
+	char nom_sect[20];
 
-	
 	
 	printf("nom ou numero de section a afficher:");
 	int numcar = scanf("%s", nom_sect);
-	
+
 	if (nom_sect[0] <= '9' && nom_sect[0] >= '0')
 	{
 		while(i < numcar)
@@ -90,7 +89,7 @@ void displaySectionTable(ElfFile elf1)
 		}
 		if (1==1)
 		{
-		  printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, elf1.tableSections[iter_s].headerSec.sh_name ,type,elf1.tableSections[iter_s].headerSec.sh_offset ,
+		  printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, elf1.tableSections[iter_s].nomSec,type,elf1.tableSections[iter_s].headerSec.sh_offset ,
 			elf1.tableSections[iter_s].headerSec.sh_addr,elf1.tableSections[iter_s].headerSec.sh_size,elf1.tableSections[iter_s].headerSec.sh_entsize, elf1.tableSections[iter_s].headerSec.sh_link,
 			elf1.tableSections[iter_s].headerSec.sh_info, elf1.tableSections[iter_s].headerSec.sh_addralign, elf1.tableSections[iter_s].headerSec.sh_flags);
 		}
@@ -147,11 +146,12 @@ void displaySymbolTable(ElfFile elf1)
     char buf[12];
     char SHNDX[10];
     char other[10];
+    int indiceTabSym = NameToIndex(".symtab",elf1.fichierElf);
 
 	printf("\n===TABLE DES SYMBOLES===\n");
 	//for each entry in the symbol table
     printf("NUMERO| NAME     | TYPE     | VALEUR     | TAILLE     | LIEN   | SHNDX | OTHER \n");
-	for(i=0; i<(elf1.tableSymb[i].headerSymb.st_size/sizeof(Symbole)); i++)
+	for(i=0; i<(elf1.tableSections[indiceTabSym].headerSec.sh_size/sizeof(Elf32_Sym)); i++)
 	{
 	    //numero alias buf
 	    sprintf(buf, "[%d]", i);
@@ -200,7 +200,7 @@ void displaySymbolTable(ElfFile elf1)
 	    {
 	        sprintf(SHNDX, "%s", "UND");
 	    }
-	    else if(elf1.tableSymb[i].headerSymb.st_shndx>=10)
+	    else if(elf1.tableSymb[i].headerSymb.st_shndx >= 10)
 	    {
 	        sprintf(SHNDX, "%s", "ABS");
 	    }
@@ -230,24 +230,20 @@ void displaySymbolTable(ElfFile elf1)
 void displayRelocatableTable(ElfFile elf1)
 {
 		
-	Elf32_Rel rel;
+	//Elf32_Rel rel;
 	//Elf32_Rela rela;
-	int i;
+	int i = NameToIndex(".rel.text",elf1.fichierElf);
     int iter_s=0;
-
+	
     printf("=========TABLE DE RELOCATION=========\n");
 	
     printf("DECALAGE    | TYPE            | INDEX ENTREE\n");
 
     //les sections de type SHT_REL
-   for ( iter_s=0; iter_s < elf1.headerElf.e_shnum; iter_s++  )
-    {
-            for(i=0; i<(elf1.tableSections[iter_s].headerSec.sh_size/sizeof(Elf32_Rel)); i++)
-            {
-                fread(&rel,sizeof(Elf32_Rel),1,elf1.fichierElf);
-                printf(" 0x%.8x | %15s | %d \n", rel.r_offset, tableRelocationARMCode[ELF32_R_TYPE(rel.r_info)], ELF32_R_SYM(rel.r_info));
-            }
-     }
+	for ( iter_s=0; iter_s < elf1.tableSections[i].headerSec.sh_size/sizeof(Elf32_Rel); iter_s++  )
+	{
+		printf(" 0x%.8x | %15s | %d \n", elf1.tableRelocation[iter_s].r_offset, tableRelocationARMCode[ELF32_R_TYPE(elf1.tableRelocation[iter_s].r_info)], ELF32_R_SYM(elf1.tableRelocation[iter_s].r_info));
+	}
 }
 
 void displayMenu(FILE* elffile_o)

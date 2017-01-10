@@ -14,7 +14,7 @@ typedef struct
 {//Section complète (nom, header et contenu)
         char * nomSec;
         Elf32_Shdr  headerSec;
-        char * contenuSec;
+        unsigned char * contenuSec;
 } Section;
 
 typedef struct 
