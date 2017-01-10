@@ -23,37 +23,43 @@ Section* readSectionTable(FILE* elfFile)
 	Section* sect = NULL;
 	int iter_s; 
 
-
-
 	ELFheader=readHeader(elfFile);
+
+	//find string section
+	int indexTableSTRSection = NameToIndex(".shstrtab", elfFile);
+	fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indexTableSTRSection), SEEK_SET);
+	fread( &STRheader, ELFheader.e_shentsize, 1, elfFile );
+
     STR_buffer_name = (char *)malloc( STRheader.sh_size);
 
     if (STR_buffer_name == NULL) 
     {
 	    printf("Impossible d'allouer la mémoire pour les noms de section\n");
     }
-    fseek( elfFile, STRheader.sh_offset, SEEK_SET);
-    fread( STR_buffer_name, STRheader.sh_size, 1, elfFile);
+    else
+    {
+	    fseek( elfFile, STRheader.sh_offset, SEEK_SET);
+	    fread( STR_buffer_name, STRheader.sh_size, 1, elfFile);
 
-	//iter and print segment names
-	fseek(elfFile, 0, SEEK_SET);
-	sect = malloc(ELFheader.e_shnum*sizeof(Section));
-	
-	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
-	{
-		fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
-		fread( &ITERheader, ELFheader.e_shentsize, 1, elfFile );
-		sect[iter_s].nomSec = STR_buffer_name+ITERheader.sh_name; 	//nom
-		sect[iter_s].headerSec = ITERheader; //header
-		sect[iter_s].contenuSec = malloc(sect[iter_s].headerSec.sh_size);						
-		fseek( elfFile, sect[iter_s].headerSec.sh_offset, SEEK_SET);
-		fread( sect[iter_s].contenuSec,sect[iter_s].headerSec.sh_size,1,elfFile ); //contenu
+		//iter and print segment names
+		fseek(elfFile, 0, SEEK_SET);
+		sect = malloc(ELFheader.e_shnum*sizeof(Section));
+		
+		for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++ )
+		{
+			fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
+			fread( &ITERheader, ELFheader.e_shentsize, 1, elfFile );
+			sect[iter_s].nomSec = STR_buffer_name+ITERheader.sh_name; 	//nom
+			sect[iter_s].headerSec = ITERheader; //header
+			sect[iter_s].contenuSec = malloc(sect[iter_s].headerSec.sh_size);						
+			fseek( elfFile, sect[iter_s].headerSec.sh_offset, SEEK_SET);
+			fread( sect[iter_s].contenuSec,sect[iter_s].headerSec.sh_size,1,elfFile ); //contenu
+		}
+
+		//free( STR_buffer_name );
 	}
-	
-
-	free( STR_buffer_name );
-	rewind(elfFile);
-	return sect;
+		rewind(elfFile);
+		return sect;
 }
 
 int NameToIndex(char* nom_sect,FILE* elfFile)
@@ -67,7 +73,6 @@ int NameToIndex(char* nom_sect,FILE* elfFile)
 	//read header
 	fseek( elfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, elfFile);
-
 
 	//find string section
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)

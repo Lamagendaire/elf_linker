@@ -87,9 +87,10 @@ void displaySectionTable(ElfFile elf1)
 		    default:
 		            break;
 		}
+
 		if (1==1)
 		{
-		  printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, elf1.tableSections[iter_s].nomSec,type,elf1.tableSections[iter_s].headerSec.sh_offset ,
+		  	printf("%6i |%15s | %12s | %6i | %4i | %4i | %6i | %4i | %4i | %8i | %3i \n",iter_s, elf1.tableSections[iter_s].nomSec,type,elf1.tableSections[iter_s].headerSec.sh_offset ,
 			elf1.tableSections[iter_s].headerSec.sh_addr,elf1.tableSections[iter_s].headerSec.sh_size,elf1.tableSections[iter_s].headerSec.sh_entsize, elf1.tableSections[iter_s].headerSec.sh_link,
 			elf1.tableSections[iter_s].headerSec.sh_info, elf1.tableSections[iter_s].headerSec.sh_addralign, elf1.tableSections[iter_s].headerSec.sh_flags);
 		}
