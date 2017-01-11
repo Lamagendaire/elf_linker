@@ -16,4 +16,7 @@ readelf.o: readelf.c readelf.h
 fusionelf.o: fusionelf.c fusionelf.h
 	gcc -c fusionelf.c $(CFlags)
 
+clean:
+	rm prog main.o display.o util.o readelf.o fusionelf.o
+
 CFlags=-Wall -g

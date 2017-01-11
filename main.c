@@ -41,11 +41,13 @@ int main(int argc, char **argv)
 
 //sinon (c'est que c'est un fichier) -> fusion des deux fichiers
   else{
-	elffile = ElfConstructor(elffile.fichierElf);
-	elffile2.fichierElf = fopen(argv[2], "r");
+	elffile = ElfConstructor(fopen(argv[1], "r"));
 	elffile2 = ElfConstructor(fopen(argv[2],"r"));
 
   	printf("Fusion des 2 fichiers");
   	elffusion=fusionProgBit(elffile,elffile2);
+
+  	
+
   }
 }
