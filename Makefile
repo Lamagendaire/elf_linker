@@ -1,4 +1,4 @@
-prog: main.o util.o display.o readelf.o fusionelf.o
+prog: display.o main.o util.o  readelf.o fusionelf.o
 	gcc -o prog main.o util.o display.o readelf.o fusionelf.o $(CFlags)
 
 main.o: main.c util.h

@@ -12,8 +12,8 @@
 #include "readelf.h"
 
 
-void displayNameSection(ElfFile elf1);
 void displaySection(ElfFile elf1);
+void displaySectionTable(ElfFile elf1);
 void displayHeaderInfos(ElfFile elf1);
 void displaySymbolTable(ElfFile elf1);
 void displayRelocatableTable(ElfFile elf1);

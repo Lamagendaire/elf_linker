@@ -46,7 +46,8 @@ int main(int argc, char **argv)
 
   	printf("Fusion des 2 fichiers");
   	elffusion=fusionProgBit(elffile,elffile2);
-
+  	
+	displaySectionTable(elffusion);
   	
 
   }
