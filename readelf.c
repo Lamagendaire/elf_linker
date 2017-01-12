@@ -2,11 +2,15 @@
 #define READELF_C
 
 #include "readelf.h"
+// ce fichier s'occupe de la mlecture d'un fichhier.o et stocke les informations dans les structures définies
 
+
+//Lecture du header
 Elf32_Ehdr readHeader(FILE* elfFile)
 {
 	rewind(elfFile);
 	Elf32_Ehdr elf1;
+	//On lit sur une taille de Elf32_Ehdr à partir du début du fichier pour lire le header
 	if (1!= fread(&elf1, sizeof(elf1), 1, elfFile))
 	{
 		printf("failed to read elf header");
@@ -14,22 +18,24 @@ Elf32_Ehdr readHeader(FILE* elfFile)
 	return elf1;
 }
 
+//Lecture de la table des sections
 Section* readSectionTable(FILE* elfFile)
 {
 
 	Elf32_Ehdr ELFheader;
-	Elf32_Shdr STRheader, ITERheader;
+	Elf32_Shdr STRheader, ITERheader;                                                                                                                                                         
 	char *STR_buffer_name=NULL;
 	Section* sect = NULL;
 	int iter_s; 
 
 	ELFheader=readHeader(elfFile);
 
-	//find string section
+	//Déplacement et lecture de shtrtab
 	int indexTableSTRSection = NameToIndex(".shstrtab", elfFile);
 	fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*indexTableSTRSection), SEEK_SET);
 	fread( &STRheader, ELFheader.e_shentsize, 1, elfFile );
 
+	// On crée une variable qui contiendra tout les noms de sections
     STR_buffer_name = (char *)malloc( STRheader.sh_size);
 
     if (STR_buffer_name == NULL) 
@@ -41,7 +47,7 @@ Section* readSectionTable(FILE* elfFile)
 	    fseek( elfFile, STRheader.sh_offset, SEEK_SET);
 	    fread( STR_buffer_name, STRheader.sh_size, 1, elfFile);
 
-		//iter and print segment names
+		//Iteration et écriture des noms de section
 		fseek(elfFile, 0, SEEK_SET);
 		sect = malloc(ELFheader.e_shnum*sizeof(Section));
 		
@@ -55,13 +61,14 @@ Section* readSectionTable(FILE* elfFile)
 			fseek( elfFile, sect[iter_s].headerSec.sh_offset, SEEK_SET);
 			fread( sect[iter_s].contenuSec,sect[iter_s].headerSec.sh_size,1,elfFile ); //contenu
 		}
-
-		//free( STR_buffer_name );
-	}
+		//free(STR_buffer_name);
+	}	
+		// Replace le curseur du fseek-fread au début du fichier
 		rewind(elfFile);
 		return sect;
 }
 
+//Fonction qui renvoie le numero d'une section entrée en paramètre / Elle rea
 int NameToIndex(char* nom_sect,FILE* elfFile)
 {
 	rewind(elfFile);
@@ -70,11 +77,11 @@ int NameToIndex(char* nom_sect,FILE* elfFile)
 	char *STR_buffer=NULL;
 	int sel = 0;
 	int iter_s=0;
-	//read header
+	//Lecture du Header
 	fseek( elfFile, 0, SEEK_SET );
 	fread( &ELFheader , sizeof(Elf32_Ehdr), 1, elfFile);
 
-	//find string section
+	//Déplacement et lecture de shtrtab
 	for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
 	{
 	fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
@@ -93,7 +100,7 @@ int NameToIndex(char* nom_sect,FILE* elfFile)
 		}
 	}
 		
-	//iter and print segment names
+	//Iterer sur les sections et enregistrer les noms de section
 	fseek(elfFile, 0, SEEK_SET);
 	for (iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
 	{
@@ -142,19 +149,18 @@ Symbole* readSymboleTable(FILE* elfFile)
 	
 	fseek(elfFile, STRheader.sh_offset, SEEK_SET);
 
-	//for each entry in the symbol table
+	//Pour chaque entrée dans la table des symboles
 	Symbole * sym = malloc((STRheader.sh_size/sizeof(Elf32_Sym))*sizeof(Symbole));
 	for(i=0; i<(STRheader.sh_size/sizeof(Elf32_Sym)); i++)
 	{
-	    //read the current symbol
+	    //Lecture du symbole courant
 	    fread(&symb,sizeof(Elf32_Sym),1,elfFile);	
 		sym[i].nomSymb = STR_buffer_name+symb.st_name;
 		sym[i].headerSymb = symb;
-
 	}
 	return sym;
-	
 }
+
 Elf32_Rel* readRelocatableTable(FILE* elfFile)
 {
 	Elf32_Ehdr ELFheader;
@@ -171,7 +177,7 @@ Elf32_Rel* readRelocatableTable(FILE* elfFile)
 	rela= malloc(ELFheader.e_shnum* sizeof(Elf32_Rel));
 
     //les sections de type SHT_REL
-   for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++  )
+   for ( iter_s=0; iter_s < ELFheader.e_shnum; iter_s++)
     {
         fseek( elfFile, ELFheader.e_shoff+(ELFheader.e_shentsize*iter_s), SEEK_SET);
         fread( &STRheader, ELFheader.e_shentsize, 1, elfFile );
@@ -188,6 +194,7 @@ Elf32_Rel* readRelocatableTable(FILE* elfFile)
     return rela;	
 }
 
+// Fonction remplissant les structures pour un fichier elf donné en paramètre
 ElfFile ElfConstructor(FILE* elfFile)
 {
 	ElfFile elf;
@@ -203,5 +210,6 @@ ElfFile ElfConstructor(FILE* elfFile)
 	elf.tableRelocation = readRelocatableTable(elfFile);
 	return elf;
 }
+
 #endif
 
