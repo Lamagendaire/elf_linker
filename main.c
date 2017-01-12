@@ -25,29 +25,43 @@ int main(int argc, char **argv)
   }
 
 //si argument 1 est pas un fichier-> retourne erreur
-  if((elffile.fichierElf = fopen(argv[1], "r")) == NULL) {
+  if((elffile.fichierElf = fopen(argv[1], "r")) == NULL)
+  {
     perror("[E] Error opening file ");
     exit(1);
   }
 
+
+  if(argv[2]==NULL)
+  {
+    printf("Erreur: Il manque un paramètre:\n -display pour accéder aux fonctions d'affichage\n 'fichier'.o pour fusionner\n");
+    exit(1);
+  }
 //si argument 2 est pas un fichier -> vérifier si option -display
-	if((elffile2.fichierElf = fopen(argv[2], "r")) == NULL) {
+	else if((elffile2.fichierElf = fopen(argv[2], "r")) == NULL)
+  {
   		if(strcmp(argv[2],"-display")==0)
   		{
-  				displayMenu(elffile.fichierElf);
+          elffile = ElfConstructor(fopen(argv[1],"r"));
+  				displayMenu(elffile);
   				//printf("afficher");
   		}
+      else
+      {
+        printf("Option ou deuxième argument non valide\n");
+      }
 	}
 
+
 //sinon (c'est que c'est un fichier) -> fusion des deux fichiers
-  else{
+  else
+  {
 	elffile = ElfConstructor(fopen(argv[1], "r"));
 	elffile2 = ElfConstructor(fopen(argv[2],"r"));
 
-  	printf("Fusion des 2 fichiers");
+  	printf("Fusion des 2 fichiers\n");
   	elffusion=fusionProgBit(elffile,elffile2);
-  	
-	displaySectionTable(elffusion);
+
   	
 
   }
