@@ -11,9 +11,7 @@
 #include "elf.h"
 #include "readelf.h"
 
-ElfFile fusionProgBit (ElfFile elf1, ElfFile elf2);
-ElfFile Comparaison(ElfFile elf1, ElfFile elf2);
-ElfFile AjoutSection(ElfFile elf, Section sec, int position);
+ElfFile fusionProgBit (ElfFile elf1, ElfFile elf2, ElfFile elf3);
 
 
 #endif

@@ -85,6 +85,7 @@ void displaySectionTable(ElfFile elf1)
 		    case 11: type = "DYNSYM";
 		            break;
 		    default:
+		    		type="UNDEFINED";
 		            break;
 		}
 
@@ -247,11 +248,9 @@ void displayRelocatableTable(ElfFile elf1)
 	}
 }
 
-void displayMenu(FILE* elffile_o)
+void displayMenu(ElfFile elffile)
 {
    int choix=100;
-	ElfFile elffile = ElfConstructor(elffile_o);
-	
 	
 	 while(choix != 0){
 	 	printf("====Menu===\n");

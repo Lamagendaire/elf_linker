@@ -17,6 +17,6 @@ void displaySectionTable(ElfFile elf1);
 void displayHeaderInfos(ElfFile elf1);
 void displaySymbolTable(ElfFile elf1);
 void displayRelocatableTable(ElfFile elf1);
-void displayMenu(FILE* ElfFile);
+void displayMenu(ElfFile elffile);
 
 #endif

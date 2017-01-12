@@ -17,6 +17,7 @@ int main(int argc, char **argv)
   // Déclaration des structures à remplir dans les fonctions de readelf.c
   ElfFile elffile;
   ElfFile elffile2;
+  ElfFile elffile3;
   ElfFile elffusion;
 
   if(argc != 3 && argc != 2  ) {
@@ -59,12 +60,11 @@ int main(int argc, char **argv)
   // On remplit les 2 structures à partir des fonctions dans readelf
   elffile = ElfConstructor(fopen(argv[1], "r"));
   elffile2 = ElfConstructor(fopen(argv[2],"r"));
-
+  elffile3 = ElfConstructor(fopen(argv[1],"r"));
   // On realise la fusion des sections progbits et on remplit elffusion
     printf("Fusion des 2 fichiers\n");
-    elffusion=fusionProgBit(elffile,elffile2);
-
-    
+    elffusion=fusionProgBit(elffile,elffile2,elffile3);
+    displayMenu(elffusion);  
 
   }
 }

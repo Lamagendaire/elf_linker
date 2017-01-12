@@ -1,22 +1,23 @@
 prog: display.o main.o util.o  readelf.o fusionelf.o
-	gcc -o prog main.o util.o display.o readelf.o fusionelf.o $(CFlags)
+	$(CC) -o prog main.o util.o display.o readelf.o fusionelf.o $(CFlags)
 
 main.o: main.c util.h
-	gcc -c main.c $(CFlags)
+	$(CC) -c main.c $(CFlags)
 
 display.o: display.c display.h readelf.h
-	gcc -c display.c $(CFlags)
+	$(CC) -c display.c $(CFlags)
 	
 util.o: util.c util.h
-	gcc -c util.c $(CFlags)
+	$(CC) -c util.c $(CFlags)
 
 readelf.o: readelf.c readelf.h
-	gcc -c readelf.c $(CFlags)
+	$(CC) -c readelf.c $(CFlags)
 
 fusionelf.o: fusionelf.c fusionelf.h
-	gcc -c fusionelf.c $(CFlags)
+	$(CC) -c fusionelf.c $(CFlags)
 
 clean:
 	rm prog main.o display.o util.o readelf.o fusionelf.o
 
 CFlags=-Wall -g
+CC=gcc -std=c99
