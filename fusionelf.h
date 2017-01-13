@@ -11,7 +11,7 @@
 #include "elf.h"
 #include "readelf.h"
 
-ElfFile fusionProgBit (ElfFile elf1, ElfFile elf2, ElfFile elf3);
+ElfFile fusionProgBit(ElfFile elf1, ElfFile elf2, ElfFile elf3);
 
 
 #endif
